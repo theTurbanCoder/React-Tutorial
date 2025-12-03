@@ -1,6 +1,9 @@
-import {useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
 
 const cache = new Map<string, any>();
+
+const CACHE_TTL = 60 * 1000
 
 let instanceIdCounter = 0 // number of components calling this hook
 
@@ -8,7 +11,13 @@ interface FetchState<T> { data: T | null, isLoading: boolean, error: string | nu
 
 export const useFetch = <T>({ url }: { url: string }): FetchState<T> => {
 
-    const instanceId = useMemo(() => instanceIdCounter++, []);
+    const instanceId = useMemo(() => {
+        // Capture the current count for this instance
+        const id = instanceIdCounter;
+        // Increment the global counter for the next instance
+        instanceIdCounter++;
+        return id;
+    }, []); // Empty dependency array ensures it runs ONLY on mount.
 
     const [fetchData, setFetchData] = useState<FetchState<T>>({
         data: null,
@@ -16,12 +25,15 @@ export const useFetch = <T>({ url }: { url: string }): FetchState<T> => {
         error: null
     })
 
+    console.log(instanceId, cache)
     const mountRef = useRef(true) // component is mounted 
 
     useEffect(() => {
 
+        let timerId: ReturnType<typeof setTimeout> | undefined;
+
         mountRef.current = true; // every time use Effetc runs the component is mounted
-        
+
         const controller = new AbortController();
         const signal = controller.signal
 
@@ -29,13 +41,20 @@ export const useFetch = <T>({ url }: { url: string }): FetchState<T> => {
 
             controller.abort()
             mountRef.current = false
-
+            clearTimeout(timerId)
         }
 
         if (cache.has(url)) {
-            console.log(`[Cache] Found data for ${url}`);
-            setFetchData((prevState) => { return { ...prevState, data: cache.get(url), isLoading: false, error: null } })
-            return cleanup;
+            const time = Date.now()
+            if (time >= cache.get(url).expriry) {
+                console.log(`[Cache] expired for ${url}`);
+                cache.delete(url)
+            }
+            else {
+                console.log(`[Cache] Found data for ${url}`);
+                setFetchData((prevState) => { return { ...prevState, data: cache.get(url).data, isLoading: false, error: null } })
+                return cleanup;
+            }
         }
 
         if (url) {
@@ -55,11 +74,17 @@ export const useFetch = <T>({ url }: { url: string }): FetchState<T> => {
                 const data: T = await response.json()
 
                 if (mountRef.current) {
-                    cache.set(url, data)
+                    cache.set(url, { data: data, expriy: Date.now() + CACHE_TTL })
                     setFetchData((prevState) => { return { ...prevState, data: data, error: null, isLoading: false } })
                 }
 
-                
+
+                timerId = setTimeout(() => {
+                    console.log(`[Timer] Auto-invalidating cache for ${url}`);
+                    cache.delete(url);
+                }, CACHE_TTL)
+
+
             }
 
             catch (error: any) {
@@ -72,7 +97,7 @@ export const useFetch = <T>({ url }: { url: string }): FetchState<T> => {
                 }
             }
         }
-        console.log(instanceId, cache)
+
         fetchData()
 
         return cleanup;
