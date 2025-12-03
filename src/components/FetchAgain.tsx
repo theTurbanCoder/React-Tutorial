@@ -1,7 +1,7 @@
 import { type JSX } from "react";
 import { useFetch } from '../hooks/useFetch'
 
-export const FetchDataWithCustomHooks = (): JSX.Element => {
+export const FetchAgain = (): JSX.Element => {
 
     const { data, isLoading, error } = useFetch<Array<any>>({ url: "https://jsonplaceholder.typicode.com/posts" })
     return <>

@@ -1,10 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import {useEffect, useMemo, useRef, useState } from "react";
 
 const cache = new Map<string, any>();
+
+let instanceIdCounter = 0 // number of components calling this hook
 
 interface FetchState<T> { data: T | null, isLoading: boolean, error: string | null }
 
 export const useFetch = <T>({ url }: { url: string }): FetchState<T> => {
+
+    const instanceId = useMemo(() => instanceIdCounter++, []);
 
     const [fetchData, setFetchData] = useState<FetchState<T>>({
         data: null,
@@ -16,6 +20,8 @@ export const useFetch = <T>({ url }: { url: string }): FetchState<T> => {
 
     useEffect(() => {
 
+        mountRef.current = true; // every time use Effetc runs the component is mounted
+        
         const controller = new AbortController();
         const signal = controller.signal
 
@@ -33,7 +39,7 @@ export const useFetch = <T>({ url }: { url: string }): FetchState<T> => {
         }
 
         if (url) {
-            setFetchData((prevState) => { return { ...prevState, data: null, isLoading: true, error: null } })
+            setFetchData((prevState) => { return { ...prevState, isLoading: true, error: null } })
         }
 
         const fetchData = async () => {
@@ -50,9 +56,10 @@ export const useFetch = <T>({ url }: { url: string }): FetchState<T> => {
 
                 if (mountRef.current) {
                     cache.set(url, data)
+                    setFetchData((prevState) => { return { ...prevState, data: data, error: null, isLoading: false } })
                 }
 
-                setFetchData((prevState) => { return { ...prevState, data: data, error: null, isLoading: false } })
+                
             }
 
             catch (error: any) {
@@ -65,7 +72,7 @@ export const useFetch = <T>({ url }: { url: string }): FetchState<T> => {
                 }
             }
         }
-
+        console.log(instanceId, cache)
         fetchData()
 
         return cleanup;
