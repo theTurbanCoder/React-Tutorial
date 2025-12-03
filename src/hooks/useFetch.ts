@@ -4,7 +4,7 @@ const cache = new Map<string, any>();
 
 interface FetchState<T> { data: T | null, isLoading: boolean, error: string | null }
 
-const useFetch = <T>({ url }: { url: string }): FetchState<T> => {
+export const useFetch = <T>({ url }: { url: string }): FetchState<T> => {
 
     const [fetchData, setFetchData] = useState<FetchState<T>>({
         data: null,
