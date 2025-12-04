@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
+interface CacheEntry<T> { data: T, expiry: number }
 
-const cache = new Map<string, any>();
+interface FetchState<T> { data: T | null, isLoading: boolean, error: string | null }
+
+
+const cache = new Map<string, CacheEntry<any>>();
 
 const CACHE_TTL = 60 * 1000
 
 let instanceIdCounter = 0 // number of components calling this hook
 
-interface FetchState<T> { data: T | null, isLoading: boolean, error: string | null }
 
 export const useFetch = <T>({ url }: { url: string }): FetchState<T> => {
 
@@ -19,14 +22,14 @@ export const useFetch = <T>({ url }: { url: string }): FetchState<T> => {
         return id;
     }, []); // Empty dependency array ensures it runs ONLY on mount.
 
-    const [fetchData, setFetchData] = useState<FetchState<T>>({
+    const [myData, setmyData] = useState<FetchState<T>>({
         data: null,
         isLoading: true,
         error: null
     })
 
-    console.log(instanceId, cache)
     const mountRef = useRef(true) // component is mounted 
+
 
     useEffect(() => {
 
@@ -46,22 +49,23 @@ export const useFetch = <T>({ url }: { url: string }): FetchState<T> => {
 
         if (cache.has(url)) {
             const time = Date.now()
-            if (time >= cache.get(url).expriry) {
+            const cacheTime = cache.get(url)!;
+            if (time > cacheTime.expiry) {
                 console.log(`[Cache] expired for ${url}`);
                 cache.delete(url)
             }
             else {
                 console.log(`[Cache] Found data for ${url}`);
-                setFetchData((prevState) => { return { ...prevState, data: cache.get(url).data, isLoading: false, error: null } })
+                setmyData((prevState) => { return { ...prevState, data: cacheTime.data, isLoading: false, error: null } })
                 return cleanup;
             }
         }
 
-        if (url) {
-            setFetchData((prevState) => { return { ...prevState, isLoading: true, error: null } })
-        }
+        // if (!cache.has(url)) { // If we're performing a network fetch
+        //     setmyData(prevState => ({ ...prevState, isLoading: true, error: null }));
+        // }
 
-        const fetchData = async () => {
+        const getFetchData = async () => {
 
             try {
                 const response = await fetch(url, { signal: signal })
@@ -74,13 +78,13 @@ export const useFetch = <T>({ url }: { url: string }): FetchState<T> => {
                 const data: T = await response.json()
 
                 if (mountRef.current) {
-                    cache.set(url, { data: data, expriy: Date.now() + CACHE_TTL })
-                    setFetchData((prevState) => { return { ...prevState, data: data, error: null, isLoading: false } })
+                    const newExpiry = Date.now() + CACHE_TTL;
+                    cache.set(url, { data: data, expiry: newExpiry })
+                    setmyData((prevState) => { return { ...prevState, data: data, error: null, isLoading: false } })
                 }
 
-
                 timerId = setTimeout(() => {
-                    console.log(`[Timer] Auto-invalidating cache for ${url}`);
+                    console.log(`[Timer] ${timerId} Auto-invalidating cache for ${url}`);
                     cache.delete(url);
                 }, CACHE_TTL)
 
@@ -93,17 +97,17 @@ export const useFetch = <T>({ url }: { url: string }): FetchState<T> => {
                 }
                 else if (mountRef.current) {
 
-                    setFetchData((prevState) => { return { ...prevState, data: null, error: error, isLoading: false } })
+                    setmyData((prevState) => { return { ...prevState, data: null, error: error, isLoading: false } })
                 }
             }
         }
 
-        fetchData()
+        getFetchData()
 
         return cleanup;
 
     }, [url])
 
-    return fetchData
+    return myData
 
 }
