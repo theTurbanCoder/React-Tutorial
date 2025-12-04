@@ -52,8 +52,6 @@ export const VirtualizedList = ({ items }: {
 
     const visibleItems = items.slice(startIndex, endIndex + 1);
 
-
-
     return (
         <div ref={parentRef} className="virtualized-container" style={{
             height: `${LIST_HEIGHT}px`,

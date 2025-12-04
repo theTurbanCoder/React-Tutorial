@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useDeferredValue, useEffect, useState } from 'react'
 
 
 import {generateMockData} from '../data/mockedData'
@@ -17,6 +17,7 @@ const [filteredData, setFilteredData] = useState(mockedData)
 
 const debouncedValue = useDebounce({value: searchQuery, delay:300})
 
+const deferredItems = useDeferredValue(filteredData)
 
 useEffect(() => {
 
@@ -33,10 +34,14 @@ useEffect(() => {
             
             <SearchInput value={searchQuery} onChange={(e) => {setSearchQuery(e.target.value)}}/>
 
-            <p>Showing {filteredData.length} results.</p>
+            <p>{filteredData !== deferredItems && (
+                    <span style={{ color: 'orange', marginLeft: '10px' }}>
+                        (Loading list results...)
+                    </span>
+                )}</p>
             
             {/* Phase 1 & 3: Virtualized List component goes here */}
-            <VirtualizedList items={filteredData} />
+            <VirtualizedList items={deferredItems} />
         </div></div>
   )
 }
