@@ -1,13 +1,15 @@
 import React from 'react'
 import './App.css'
-import { FetchDataWithCustomHooks } from './components/FetchDataWithCustomHook'
+import { DataExplorer } from './components/DataExplorer'
+
+
 
 function App() {
 
 
   return (
     <>
-    <FetchDataWithCustomHooks />
+      <DataExplorer />
     </>
   )
 }
