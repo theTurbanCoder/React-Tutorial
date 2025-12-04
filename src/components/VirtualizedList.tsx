@@ -61,13 +61,17 @@ export const VirtualizedList = ({ items }: {
         }}>
 
             <div
-                style={{ height: `${totalHeight}px`, position: 'relative' }}
+                style={{ height: `${totalHeight}px`, position: 'relative', width: '100%' }}
 
             >
                 <div style={{
-                        transform: `translateY(${offset}px)`,
-                        willChange: 'transform'
-                    }}>{visibleItems.map((item) => <div>
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    transform: `translateY(${offset}px)`,
+                    willChange: 'transform',
+                }}>{visibleItems.map((item) => <div>
 
                     {<Row key={item.id} item={item}></Row>}
                 </div>)}</div>
