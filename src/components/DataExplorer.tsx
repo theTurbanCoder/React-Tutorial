@@ -5,6 +5,7 @@ import {generateMockData} from '../data/mockedData'
 import { SearchInput } from './SearchInput'
 import { useDebounce } from '../hooks/useDebounce'
 import { searchData } from '../lib/searchData'
+import { VirtualizedList } from './VirtualizedList'
 
 const mockedData = generateMockData(100000)
 
@@ -35,7 +36,7 @@ useEffect(() => {
             <p>Showing {filteredData.length} results.</p>
             
             {/* Phase 1 & 3: Virtualized List component goes here */}
-            {/* <VirtualizedList items={deferredResults} /> */}
+            <VirtualizedList items={filteredData} />
         </div></div>
   )
 }

@@ -1,0 +1,78 @@
+import React, { memo, useRef, useState } from 'react'
+import { useScrollEffect } from '../hooks/useScrollEffect';
+import { calculateVisibleIndex } from '../lib/calculateVisibleIndex';
+
+
+const ROW_HEIGHT = 80;
+const LIST_HEIGHT = 600;
+
+
+const Row = memo(({ item }: {
+    item: {
+        id: number;
+        name: string;
+        category: string;
+        description: string;
+        price: string;
+    }
+}) => (
+    <div
+        key={item.id} style={{ height: `${ROW_HEIGHT}px`, padding: '10px 15px', borderBottom: '1px solid #eee' }}
+    >
+        <span style={{ fontWeight: 'bold' }}>{item.name}</span>
+        <span style={{ float: 'right', color: '#666' }}>{item.category}</span>
+        <p style={{ margin: '5px 0 0', fontSize: '12px', color: '#888' }}>
+            {item.description.substring(0, 80)}...
+        </p>
+    </div>
+));
+
+export const VirtualizedList = ({ items }: {
+    items: {
+        id: number;
+        name: string;
+        category: string;
+        description: string;
+        price: string;
+    }[]
+}) => {
+
+
+    const totalHeight = items.length * ROW_HEIGHT;
+
+
+    const parentRef = useRef<HTMLDivElement>(null);
+    const [scrollTop, setScrollTop] = useState(0)
+
+    useScrollEffect<HTMLDivElement>({ parentRef: parentRef, setScrollTop })
+
+    const { startIndex, endIndex, offset } = calculateVisibleIndex({ scrollTop, height: totalHeight, itemsLength: items.length })
+
+    const visibleItems = items.slice(startIndex, endIndex + 1);
+
+
+
+    return (
+        <div ref={parentRef} className="virtualized-container" style={{
+            height: `${LIST_HEIGHT}px`,
+            width: '800px',
+            overflow: 'auto', // MUST be scrollable
+            border: '1px solid #ddd',
+        }}>
+
+            <div
+                style={{ height: `${totalHeight}px`, position: 'relative' }}
+
+            >
+                <div style={{
+                        transform: `translateY(${offset}px)`,
+                        willChange: 'transform'
+                    }}>{visibleItems.map((item) => <div>
+
+                    {<Row key={item.id} item={item}></Row>}
+                </div>)}</div>
+            </div>
+        </div>
+    )
+}
+
