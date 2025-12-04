@@ -1,4 +1,4 @@
-import React, { memo, useRef, useState } from 'react'
+import React, { memo, useCallback, useRef, useState } from 'react'
 import { useScrollEffect } from '../hooks/useScrollEffect';
 import { calculateVisibleIndex } from '../lib/calculateVisibleIndex';
 
@@ -42,15 +42,32 @@ export const VirtualizedList = ({ items }: {
 
 
     const parentRef = useRef<HTMLDivElement>(null);
+    const lastElementRef = useRef<HTMLDivElement>(null)
+
+
     const [scrollTop, setScrollTop] = useState(0)
 
-    useScrollEffect<HTMLDivElement>({ parentRef: parentRef, setScrollTop })
+
+    const handleScrollToEnd =useCallback( () => {
+
+        lastElementRef.current?.lastElementChild?.scrollIntoView({
+            behavior:'smooth',
+            block:'nearest',
+            inline:'end'
+        })
+
+    }, [lastElementRef])
+
+   useScrollEffect<HTMLDivElement>({ parentRef: parentRef, setScrollTop })
 
     const { startIndex, endIndex, offset } = calculateVisibleIndex({ scrollTop, height: totalHeight, itemsLength: items.length })
 
     const visibleItems = items.slice(startIndex, endIndex + 1);
 
     return (
+        <>
+        <button onClick={handleScrollToEnd}> scroll To end </button>
+
         <div ref={parentRef} className="virtualized-container" style={{
             height: `${LIST_HEIGHT}px`,
             width: '800px',
@@ -63,7 +80,7 @@ export const VirtualizedList = ({ items }: {
                 style={{ height: `${totalHeight}px`, position: 'relative', width: '100%' }}
 
             >
-                <div style={{
+                <div ref={lastElementRef} style={{
                     position: 'absolute',
                     top: 0,
                     left: 0,
@@ -76,6 +93,7 @@ export const VirtualizedList = ({ items }: {
                 </div>)}</div>
             </div>
         </div>
+        </>
     )
 }
 
