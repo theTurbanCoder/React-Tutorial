@@ -5,6 +5,7 @@ const OVERSCAN_COUNT = 5; // Buffer zones
 
 export const calculateVisibleIndex = ({scrollTop, height, itemsLength}:{scrollTop: number, height: number, itemsLength:number}) => {
 
+    console.log(scrollTop, height, itemsLength)
 
     const startIndex = Math.max(
         0,

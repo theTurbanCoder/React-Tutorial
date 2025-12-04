@@ -38,7 +38,7 @@ export const VirtualizedList = ({ items }: {
 }) => {
 
 
-    const totalHeight = items.length * ROW_HEIGHT;
+    const totalHeight = LIST_HEIGHT
 
 
     const parentRef = useRef<HTMLDivElement>(null);
@@ -47,6 +47,8 @@ export const VirtualizedList = ({ items }: {
     useScrollEffect<HTMLDivElement>({ parentRef: parentRef, setScrollTop })
 
     const { startIndex, endIndex, offset } = calculateVisibleIndex({ scrollTop, height: totalHeight, itemsLength: items.length })
+
+    console.log(startIndex,endIndex)
 
     const visibleItems = items.slice(startIndex, endIndex + 1);
 
@@ -58,6 +60,7 @@ export const VirtualizedList = ({ items }: {
             width: '800px',
             overflow: 'auto', // MUST be scrollable
             border: '1px solid #ddd',
+            overscrollBehaviorBlock:"contain"
         }}>
 
             <div
