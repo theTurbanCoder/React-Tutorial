@@ -61,10 +61,6 @@ export const useFetch = <T>({ url }: { url: string }): FetchState<T> => {
             }
         }
 
-        // if (!cache.has(url)) { // If we're performing a network fetch
-        //     setmyData(prevState => ({ ...prevState, isLoading: true, error: null }));
-        // }
-
         const getFetchData = async () => {
 
             try {
