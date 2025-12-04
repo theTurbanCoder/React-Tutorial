@@ -1,7 +1,7 @@
 import React, { useDeferredValue, useEffect, useState } from 'react'
 
 
-import {generateMockData} from '../data/mockedData'
+import { generateMockData } from '../data/mockedData'
 import { SearchInput } from './SearchInput'
 import { useDebounce } from '../hooks/useDebounce'
 import { searchData } from '../lib/searchData'
@@ -11,38 +11,37 @@ const mockedData = generateMockData(100000)
 
 export const DataExplorer = () => {
 
-const [searchQuery,setSearchQuery] = useState("")
+    const [searchQuery, setSearchQuery] = useState("")
 
-const [filteredData, setFilteredData] = useState(mockedData)
+    const [filteredData, setFilteredData] = useState(mockedData)
 
-const debouncedValue = useDebounce({value: searchQuery, delay:300})
+    const debouncedValue = useDebounce({ value: searchQuery, delay: 300 })
 
-const deferredItems = useDeferredValue(filteredData)
+    const deferredItems = useDeferredValue(filteredData)
 
-useEffect(() => {
+    useEffect(() => {
 
-    const results = searchData({query: searchQuery, values: filteredData})
+        const results = searchData({ query: searchQuery, values: filteredData })
 
-    setFilteredData(results)
+        setFilteredData(results)
 
 
-}, [debouncedValue])
+    }, [debouncedValue])
 
-  return (
-    <div><div className="data-explorer">
+    return (
+        <div><div className="data-explorer">
             <h2>Virtualized Data Explorer</h2>
-            
-            <SearchInput value={searchQuery} onChange={(e) => {setSearchQuery(e.target.value)}}/>
+
+            <SearchInput value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value) }} />
 
             <p>{filteredData !== deferredItems && (
-                    <span style={{ color: 'orange', marginLeft: '10px' }}>
-                        (Loading list results...)
-                    </span>
-                )}</p>
-            
-            {/* Phase 1 & 3: Virtualized List component goes here */}
+                <span style={{ color: 'orange', marginLeft: '10px' }}>
+                    (Loading list results...)
+                </span>
+            )}</p>
+
             <VirtualizedList items={deferredItems} />
         </div></div>
-  )
+    )
 }
 

@@ -48,8 +48,6 @@ export const VirtualizedList = ({ items }: {
 
     const { startIndex, endIndex, offset } = calculateVisibleIndex({ scrollTop, height: totalHeight, itemsLength: items.length })
 
-    console.log(startIndex,endIndex)
-
     const visibleItems = items.slice(startIndex, endIndex + 1);
 
     return (
