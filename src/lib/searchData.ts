@@ -30,6 +30,4 @@ export const searchData = ({query, values}:SearchDataProps) => {
     searchQuery.set(trimmedQuery, { data : results, ttl: Date.now() + 6*1000})
     
     return results
-
-    // useEffect(() => {}, [trimmedQuery])
 }

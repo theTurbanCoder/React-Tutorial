@@ -52,7 +52,7 @@ export const VirtualizedList = ({ items }: {
 
         lastElementRef.current?.lastElementChild?.scrollIntoView({
             behavior:'smooth',
-            block:'nearest',
+            block:'start',
             inline:'end'
         })
 
